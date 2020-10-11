@@ -23,12 +23,12 @@
             "defaultValue": "nsg01",
             "type": "string"
         },
-        "pipDC01_name": {
-            "defaultValue": "pipDC01",
+        "pip01_name": {
+            "defaultValue": "pip01",
             "type": "string"
         },
-        "nicDC01_name": {
-            "defaultValue": "nicDC01",
+        "nic01_name": {
+            "defaultValue": "nic01",
             "type": "string"
         },
         "vm_name": {
@@ -49,7 +49,7 @@
         },
         "DNSLabel": {
             "type": "string",
-            "defaultValue": "iaaclab"
+            "defaultValue": "idlabs01"
         },
         "vmsize": {
             "type": "string",
@@ -177,12 +177,18 @@
         },
 
         {
-            "name": "[parameters('pipDC01_name')]",
+            "name": "[parameters('pip01_name')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
+            "dependsOn": [ 
+                "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vn01_name')),'/subnets/', 'subnet1')]",
+                "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vn01_name')),'/subnets/', 'subnet2')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
+            ],
+
             "tags": {
-                "displayName": "[parameters('pipDC01_name')]"
+                "displayName": "[parameters('pip01_name')]"
             },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -193,16 +199,18 @@
         },
 
         {
-            "name": "[parameters('nicDC01_name')]",
+            "name": "[parameters('nic01_name')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-11-01",
             "location": "[resourceGroup().location]",
             "tags": {
-                "displayName": "[parameters('nicDC01_name')]"
+                "displayName": "[parameters('nic01_name')]"
             },
             "dependsOn": [
                 "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vn01_name')),'/subnets/', 'subnet1')]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
+                "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vn01_name')),'/subnets/', 'subnet2')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses',parameters('pip01_name'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -214,22 +222,22 @@
                                 "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('vn01_name')),'/subnets/', 'subnet1')]"
                             },
                             "publicIPAddress": {
-                                "id": "[resourceId ('Microsoft.Network/publicIPAddresses/', parameters('pipDC01_name'))]"
+                                "id": "[resourceId ('Microsoft.Network/publicIPAddresses/', parameters('pip01_name'))]"
                             }
                         }
-                        
+
                     }
                 ]
             }
         },
-        
+
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-03-01",
             "name": "[parameters('vm_name')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[parameters('nicDC01_name')]"
+                "[parameters('nic01_name')]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -272,7 +280,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicDC01_name'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nic01_name'))]"
                         }
                     ]
                 }

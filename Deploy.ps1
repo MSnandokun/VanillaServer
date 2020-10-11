@@ -22,4 +22,4 @@ param(
 
 )
 
-New-AzResourceGroupDeployment -ResourceGroupName "deployTest01" -TemplateFile ".\template.json" -admin_name "Nando" -admin_password "Password1"
+New-AzResourceGroupDeployment -ResourceGroupName "IDLabs-test01" -TemplateFile ".\ServerVM.json" -admin_name "Nando" -admin_password "P@ssw0rd1"
